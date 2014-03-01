@@ -113,40 +113,55 @@ namespace MineSolver
             var missingMines = field.Value - GetMines(field);
             var unknownFields = GetUnknownFieldIds(field);
             List<List<int>> combinations = PermutationsOf(unknownFields, missingMines);
-            int solutions = 0;
-            var solution = new List<int>(); //der skal mere information til
+            var solutions = new List<List<int>>(); 
             foreach (var combination in combinations)
             {
-                bool isSolution = false;
+                bool isSolution = true;
                 foreach (var nField in field.Neighbours)
                 {
                     //TODO: Kig på om kombinationen opfylder naboernes krav
                     //1. Naboerne må aldrig tildeles flere miner end deres værdi
-                    if (field.Value - GetMines(field) < FieldsIncluded(combination, nField))
-                    {//not a valid solution
-                    }
                     //2. Naboerne skal have unknowns tilbage efter at en løsning er blevet valgt hvor deres værdi ikke fuldt er nået.
-                    if (FieldsIncluded(combination, nField) > 0)
+                    if (field.Value - GetMines(field) < FieldsIncluded(combination, nField) || FieldsIncluded(combination, nField) > 0)
                     {//not a valid solution
+                        isSolution = false;
+                        break;
                     }
-                    //TODO: Solutions skal gemmes på id'er så de kan sammen lignes bagefter.
                 }
-                //TODO: VIGTIG!! Kig på om alle solutions indeholder fælles træk (som et felt der er undladt eller inkluderet
                 if (isSolution)
                 {
-                    solutions++;
-                    if (solutions > 1) //ikke nødvendigvis se ovenstående kommentar
-                        return;
-                    solution = combination;
+                    solutions.Add(combination);
                 }
             }
-            if (solutions != 0)
+
+            if (solutions.Count != 0)
             {
-                foreach (var id in solution)
+                var comparisonMap = new Dictionary<int, int>();
+                foreach (var neighbour in field.Neighbours)
                 {
-                    GameboardFields[id].FieldType = FieldType.Mine; //skal ændres til både at kunne deffinere miner og Numbered, alt efter hvad sitiurationen viser.
+                    comparisonMap[neighbour] = 0; 
                 }
-                SetNumbered(field);
+                foreach (var candidate in solutions)
+                {
+                    foreach (var id in field.Neighbours)
+                    {
+                        if (candidate.Contains(field.Neighbours[id]))
+                        {
+                            comparisonMap[id] = comparisonMap[id] + 1;
+                        }    
+                    }
+                }
+                foreach (var id in field.Neighbours)
+                {
+                    if (comparisonMap[id] == 0)
+                    {
+                        SetNumbered(GameboardFields[id]);
+                    }
+                    if (comparisonMap[id] == solutions.Count)
+                    {
+                        SetMine(GameboardFields[id]);
+                    }
+                }
             }
         }
 
@@ -191,7 +206,7 @@ namespace MineSolver
                         if (indexs[i] != fields.Count() - 1)
                         {
                             indexs[i]++;
-                            break; //breaks for loop?
+                            break;
                         }
                     }
                     else
@@ -203,7 +218,7 @@ namespace MineSolver
                             {
                                 indexs[j + 1] = indexs[j] + 1;
                             }
-                            break; //breaks for loop?
+                            break;
                         }
                     }
                 }

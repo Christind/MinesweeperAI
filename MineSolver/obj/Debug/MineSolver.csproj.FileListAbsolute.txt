@@ -5,3 +5,4 @@ C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\bin\Debug\MineSo
 C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\obj\Debug\MineSolver.csprojResolveAssemblyReference.cache
 C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\obj\Debug\MineSolver.exe
 C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\obj\Debug\MineSolver.pdb
+C:\Users\Chris\workspace\@GitHub\MinesweeperAI\MineSolver\bin\Debug\MineSolver.exe.config
