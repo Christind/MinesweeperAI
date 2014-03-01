@@ -14,9 +14,7 @@ namespace MineSolver
 
         //Field attributes
         public int Value { get; set; }
-        public bool IsMine { get; set; }
-        public bool IsUnknown { get; set; }
-        public bool IsDeclared { get; set; }
+        public FieldType FieldType { get; set; }
 
         //Static variables
         public int Id { get; set; }
@@ -26,9 +24,14 @@ namespace MineSolver
 
         public Field()
         {
-            IsMine = false;
-            IsUnknown = true;
-            IsDeclared = false;
+            FieldType = FieldType.Unknown;
         }
+    }
+
+    public enum FieldType
+    {
+        Mine,
+        Unknown,
+        Numbered
     }
 }

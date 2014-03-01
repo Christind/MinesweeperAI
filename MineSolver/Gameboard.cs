@@ -8,9 +8,13 @@ namespace MineSolver
     {
         public Field[] GameboardFields { get; set; }
 
+        private ScreenReader screenReader;
         static void Main()
         {
             var app = new Gameboard();
+            app.screenReader = new ScreenReader();
+            app.screenReader.Screenshot();
+
             app.Run();
         }
 
@@ -22,27 +26,14 @@ namespace MineSolver
             //TODO: coloured fields needs to be active the grey fields are always inactive.
             while (!done)
             {
-                foreach (var field in GameboardFields)
+                foreach (var field in GameboardFields.Where(x => x.FieldType == FieldType.Numbered))
                 {
-                    if (field.IsDeclared) // Moves are only determined from Declared Fields
-                    {
-                        NextMove(field); //This method determines if you can update a value arround the current field.
-                        //TODO: screen Values need to be transfered into GameboardFields[] here. (update GameboardFields from screen)  
-                    }
+                    NextMove(field); //This method determines if you can update a value arround the current field.
+                    //TODO: screen Values need to be transfered into GameboardFields[] here. (update GameboardFields from screen)  
                 }
-           
-                for (int i = 0; i < GameboardFields.Count(); i++) // For loop to determine when the puzzle is solved.
-                {
-                    if (GameboardFields[i].IsUnknown)
-                    {
-                        i = GameboardFields.Count() + 1;
-                        done = false;
-                    }
-                    else
-                    {
-                        done = true;
-                    }
-                }
+
+                // Determine when the puzzle is solved.
+                done = GameboardFields.All(x => x.FieldType != FieldType.Unknown);
             }
         }
 
@@ -50,13 +41,13 @@ namespace MineSolver
         {
             if (GetMines(field) == field.Value) //if the field already has the correct number of mines
             {
-                SetDeclared(field); //all remaining undeclared fields are not mines
+                SetNumbered(field); //all remaining unNumbered fields are not mines
                 //TODO: Set this field to inactive, and if new fields appear update these aswell
                 return;
             }
             if (GetUnknown(field) + GetMines(field) == field.Value)
             {
-                SetMine(field); //all remaining undeclared fields are mines
+                SetMine(field); //all remaining unNumbered fields are mines
                 //TODO: set this field to inactive
                 return;
             }
@@ -69,35 +60,33 @@ namespace MineSolver
 
         public int GetMines(Field field) //How many of my neighbours do i know are mines
         {
-            return field.Neighbours.Count(id => GameboardFields[id].IsMine);
+            return field.Neighbours.Count(id => GameboardFields[id].FieldType == FieldType.Mine);
         }
 
-        public int GetDeclared(Field field) //How many of my neighbours do i know are Declared
+        public int GetNumbered(Field field) //How many of my neighbours do i know are Numbered
         {
-            return field.Neighbours.Count(id => GameboardFields[id].IsDeclared);
+            return field.Neighbours.Count(id => GameboardFields[id].FieldType == FieldType.Numbered);
         }
 
         public int GetUnknown(Field field) //How many of my neighbours do i know are Unknown
         {
-            return field.Neighbours.Count(id => GameboardFields[id].IsUnknown);
+            return field.Neighbours.Count(id => GameboardFields[id].FieldType == FieldType.Unknown);
         }
 
         public void SetMine(Field field) //Sets all neighbours of 'field' to be mines
         {
-            foreach (var id in field.Neighbours.Where(id => GameboardFields[id].IsUnknown))
+            foreach (var id in field.Neighbours.Where(id => GameboardFields[id].FieldType == FieldType.Unknown))
             {
-                GameboardFields[id].IsMine = true;
-                GameboardFields[id].IsUnknown = false;
+                GameboardFields[id].FieldType = FieldType.Mine;
             }
             //GameboardFields[field.Id].IsActive = false;
         }
 
-        public void SetDeclared(Field field) //Sets all neighbours of 'field' to be declared
+        public void SetNumbered(Field field) //Sets all neighbours of 'field' to be Numbered
         {
-            foreach (var id in field.Neighbours.Where(id => GameboardFields[id].IsUnknown))
+            foreach (var id in field.Neighbours.Where(id => GameboardFields[id].FieldType == FieldType.Unknown))
             {
-                GameboardFields[id].IsDeclared = true;
-                GameboardFields[id].IsUnknown = false;
+                GameboardFields[id].FieldType = FieldType.Numbered;
                 //update Value from screen
             }
             //GameboardFields[field.Id].IsActive = false;
@@ -121,105 +110,105 @@ namespace MineSolver
 
         public void TwoPointLogic(Field field)
         {
-	        var missingMines = field.Value - GetMines(field);
-        	var unknownFields = GetUnknownFieldIds(field);
-        	List<List<int>> combinations = PermutationsOf(unknownFields, missingMines);
-        	int solutions = 0; 
-        	var solution = new List<int>(); //der skal mere information til
-        	foreach(var combination in combinations)
-        	{
-        		bool isSolution = false;
-        		foreach(var nField in field.Neighbours)
-        		{
-        			//TODO: Kig på om kombinationen opfylder naboernes krav
-        			//1. Naboerne må aldrig tildeles flere miner end deres værdi
-        			if(field.Value - GetMines(field) < FieldsIncluded(combination, nField))
-		        	{//not a valid solution
-	        		}
-	                //2. Naboerne skal have unknowns tilbage efter at en løsning er blevet valgt hvor deres værdi ikke fuldt er nået.
-		            if(FieldsIncluded(combination, nField) > 0)
-			        {//not a valid solution
-			        }
+            var missingMines = field.Value - GetMines(field);
+            var unknownFields = GetUnknownFieldIds(field);
+            List<List<int>> combinations = PermutationsOf(unknownFields, missingMines);
+            int solutions = 0;
+            var solution = new List<int>(); //der skal mere information til
+            foreach (var combination in combinations)
+            {
+                bool isSolution = false;
+                foreach (var nField in field.Neighbours)
+                {
+                    //TODO: Kig på om kombinationen opfylder naboernes krav
+                    //1. Naboerne må aldrig tildeles flere miner end deres værdi
+                    if (field.Value - GetMines(field) < FieldsIncluded(combination, nField))
+                    {//not a valid solution
+                    }
+                    //2. Naboerne skal have unknowns tilbage efter at en løsning er blevet valgt hvor deres værdi ikke fuldt er nået.
+                    if (FieldsIncluded(combination, nField) > 0)
+                    {//not a valid solution
+                    }
                     //TODO: Solutions skal gemmes på id'er så de kan sammen lignes bagefter.
-		        }
+                }
                 //TODO: VIGTIG!! Kig på om alle solutions indeholder fælles træk (som et felt der er undladt eller inkluderet
-		        if(isSolution)
-		        {
-			        solutions++;
-		        	if(solutions > 1) //ikke nødvendigvis se ovenstående kommentar
-		    		    return;
-			        solution = combination;
-        		}
-	        }
-	        if(solutions != 0)
-	        {
-		        foreach(var id in solution)
-		        {
-			        GameboardFields[id].IsMine = true; //skal ændres til både at kunne deffinere miner og declared, alt efter hvad sitiurationen viser.
-	        	}
-		        SetDeclared(field);
-	        }
+                if (isSolution)
+                {
+                    solutions++;
+                    if (solutions > 1) //ikke nødvendigvis se ovenstående kommentar
+                        return;
+                    solution = combination;
+                }
+            }
+            if (solutions != 0)
+            {
+                foreach (var id in solution)
+                {
+                    GameboardFields[id].FieldType = FieldType.Mine; //skal ændres til både at kunne deffinere miner og Numbered, alt efter hvad sitiurationen viser.
+                }
+                SetNumbered(field);
+            }
         }
 
         public List<int> GetUnknownFieldIds(Field field)
         {
-	        var returnList = new List<int>();
-        	foreach(var id in field.Neighbours)
-	        {
-		        if(GameboardFields[id].IsUnknown)
-		        {
-		        	returnList[returnList.Count()] = id;
-		        }
-	        }
-	        return returnList;
+            var returnList = new List<int>();
+            foreach (var id in field.Neighbours)
+            {
+                if (GameboardFields[id].FieldType == FieldType.Unknown)
+                {
+                    returnList[returnList.Count()] = id;
+                }
+            }
+            return returnList;
         }
 
         public List<List<int>> PermutationsOf(List<int> fields, int mineCount)
         {
-    	    var returnList = new List<List<int>>();
+            var returnList = new List<List<int>>();
             var indexs = new List<int>();
-       	    bool done = false;
-	        for(int i = 0; i < mineCount-1; i++) //check that it only loops the needed times
-	        {
+            bool done = false;
+            for (int i = 0; i < mineCount - 1; i++) //check that it only loops the needed times
+            {
                 indexs[i] = i;
-	        }
-        	while(!done)
-	        {
-		        var combination = new List<int>();
-		        for(int i = 0; i < mineCount-1; i++) //check that it only loops the needed times
-          		{
-        			combination[i] = fields[indexs[i]];
-        		}
-        		returnList.Add(combination);
-        		if(indexs[0] == fields.Count() - indexs.Count())
-	         	{
-	    	    	done = true;
-    	    	}
-	        	for(int i = indexs.Count()-1; i > 0; i--) //check that it only loops the needed times
-		        {
-	        		if(i == indexs.Count()-1)
-			        {
-		        		if(indexs[i] != fields.Count() - 1)
-			        	{
-		        			indexs[i]++;
-				        	break; //breaks for loop?
-				        }
-			        }
-			        else
-		        	{
-				        if(indexs[i] != indexs[i+1]-1)
-				        {
-					        indexs[i]++;
-        					for(int j = i; j < indexs.Count() - 1; j++) //check that it only loops the needed times
-		        			{
-				        		indexs[j+1] = indexs[j]+1;
-        					}
-		        			break; //breaks for loop?
-		        		}
-			        }
-		        }
-	        }
-	        return returnList;
+            }
+            while (!done)
+            {
+                var combination = new List<int>();
+                for (int i = 0; i < mineCount - 1; i++) //check that it only loops the needed times
+                {
+                    combination[i] = fields[indexs[i]];
+                }
+                returnList.Add(combination);
+                if (indexs[0] == fields.Count() - indexs.Count())
+                {
+                    done = true;
+                }
+                for (int i = indexs.Count() - 1; i > 0; i--) //check that it only loops the needed times
+                {
+                    if (i == indexs.Count() - 1)
+                    {
+                        if (indexs[i] != fields.Count() - 1)
+                        {
+                            indexs[i]++;
+                            break; //breaks for loop?
+                        }
+                    }
+                    else
+                    {
+                        if (indexs[i] != indexs[i + 1] - 1)
+                        {
+                            indexs[i]++;
+                            for (int j = i; j < indexs.Count() - 1; j++) //check that it only loops the needed times
+                            {
+                                indexs[j + 1] = indexs[j] + 1;
+                            }
+                            break; //breaks for loop?
+                        }
+                    }
+                }
+            }
+            return returnList;
         }
 
         public int FieldsIncluded(List<int> mines, int id)
