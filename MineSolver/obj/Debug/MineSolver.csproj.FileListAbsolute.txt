@@ -1,0 +1,1 @@
+c:\users\chris\documents\visual studio 2012\Projects\MineSolver\MineSolver\bin\Debug\MineSolver.exe.config
