@@ -17,22 +17,22 @@ namespace MineSolver
 
         public ScreenReader()
         {
-            XBoundsStart = 500;
-            YBoundsStart = 500;
-            XBoundsEnd = 1800;
-            YBoundsEnd = 1800;
         }
 
         public Bitmap Screenshot()
         {
-            Bitmap bmpScreenshot = new Bitmap((XBoundsEnd - XBoundsStart), (YBoundsEnd - YBoundsStart));
-
-            Graphics g = Graphics.FromImage(bmpScreenshot);
             var size = new Size((XBoundsEnd - XBoundsStart), (YBoundsEnd - YBoundsStart));
-            g.CopyFromScreen(XBoundsStart, YBoundsStart, XBoundsEnd, YBoundsEnd, size);
-            bmpScreenshot.Save("test2.jpg");
-            
-            return bmpScreenshot;
+            using (var bmpScreenshot = new Bitmap(size.Width, size.Height))
+            {
+                Graphics g = Graphics.FromImage(bmpScreenshot);
+
+                g.CopyFromScreen(XBoundsStart, YBoundsStart, 0, 0, size);
+                bmpScreenshot.Save("test2.jpg");
+
+                g.Flush();
+
+                return bmpScreenshot;
+            }
         }
     }
 }

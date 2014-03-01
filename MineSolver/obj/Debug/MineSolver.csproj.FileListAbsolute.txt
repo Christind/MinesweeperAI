@@ -1,8 +1,0 @@
-c:\users\chris\documents\visual studio 2012\Projects\MineSolver\MineSolver\bin\Debug\MineSolver.exe.config
-C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\bin\Debug\MineSolver.exe.config
-C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\bin\Debug\MineSolver.exe
-C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\bin\Debug\MineSolver.pdb
-C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\obj\Debug\MineSolver.csprojResolveAssemblyReference.cache
-C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\obj\Debug\MineSolver.exe
-C:\Users\Morten Klim Sørensen\Desktop\MinesweeperAI\MineSolver\obj\Debug\MineSolver.pdb
-C:\Users\Chris\workspace\@GitHub\MinesweeperAI\MineSolver\bin\Debug\MineSolver.exe.config

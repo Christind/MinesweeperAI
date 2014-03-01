@@ -1,6 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Policy;
+using System.Windows.Forms;
+using DataStore;
+using ScreenAreaSelector;
 
 namespace MineSolver
 {
@@ -9,10 +14,23 @@ namespace MineSolver
         public Field[] GameboardFields { get; set; }
 
         private ScreenReader screenReader;
+        private DataStorage dataStorage;
+
+        [STAThread]
         static void Main()
         {
             var app = new Gameboard();
-            app.screenReader = new ScreenReader();
+            app.dataStorage = DataStorage.GetInstance();
+            Application.Run(new SelectRetangle());
+
+            int[] dimensions = app.dataStorage.Data["Dimensions"];
+            app.screenReader = new ScreenReader
+            {
+                XBoundsStart = dimensions[2],
+                YBoundsStart = dimensions[3],
+                XBoundsEnd = dimensions[0],
+                YBoundsEnd = dimensions[1]
+            };
             app.screenReader.Screenshot();
 
             app.Run();
